@@ -62,7 +62,6 @@ const Landing = () => {
   return (
     <main className="flex-1 mx-auto px-4 bg-gradient-to-bl from-white to-gray-100  rounded-xl">
       <section className="py-12 flex flex-col items-center mx-auto  ">
-        <HeroSlider slides={slides} />
         <AnimatedHead1 />
         <p>Discover amazing features and services tailored just for you.</p>
       </section>

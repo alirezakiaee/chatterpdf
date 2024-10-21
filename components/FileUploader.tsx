@@ -1,7 +1,7 @@
 "use client";
 
-import { CircleArrowDown, CircleArrowDownIcon, RocketIcon } from "lucide-react";
-import { use, useCallback } from "react";
+import { CircleArrowDownIcon, RocketIcon } from "lucide-react";
+import { useCallback } from "react";
 import { useDropzone } from "react-dropzone";
 
 function FileUploader() {

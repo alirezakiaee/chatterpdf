@@ -27,9 +27,21 @@ const Header = () => {
           </SignedOut>
           <SignedIn>
             <div className="flex gap-4">
-              <Button  asChild variant="link" className="hidden md:flex"><Link href="/dashboard/upgrade">Pricing</Link></Button>
-              <Button  asChild variant="outline" className="hidden md:flex"><Link href="/dashboard">My Documents</Link></Button>
-              <Button  asChild variant="outline" className="bg-indigo-400 text-white"><Link href="/dashboard/upload"><FilePlus2/></Link></Button>
+              <Button asChild variant="link" className="hidden md:flex">
+                <Link href="/dashboard/upgrade">Pricing</Link>
+              </Button>
+              <Button asChild variant="outline" className="hidden md:flex">
+                <Link href="/dashboard">My Documents</Link>
+              </Button>
+              <Button
+                asChild
+                variant="outline"
+                className="bg-indigo-400 text-white"
+              >
+                <Link href="/dashboard/upload">
+                  <FilePlus2 />
+                </Link>
+              </Button>
               <UserButton afterSwitchSessionUrl="/dashboard" />
             </div>
           </SignedIn>

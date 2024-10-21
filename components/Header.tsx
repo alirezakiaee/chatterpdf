@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import MainNav from "./Main-nav";
 import MobileNav from "./Mobile-nav";
+import { FilePlus2 } from "lucide-react";
 
 const Header = () => {
   return (
@@ -25,8 +26,10 @@ const Header = () => {
             </SignInButton>
           </SignedOut>
           <SignedIn>
-            <div className="flex">
-
+            <div className="flex gap-4">
+              <Button  asChild variant="link" className="hidden md:flex"><Link href="/dashboard/upgrade">Pricing</Link></Button>
+              <Button  asChild variant="outline" className="hidden md:flex"><Link href="/dashboard">My Documents</Link></Button>
+              <Button  asChild variant="outline" className="bg-indigo-400 text-white"><Link href="/dashboard/upload"><FilePlus2/></Link></Button>
               <UserButton afterSwitchSessionUrl="/dashboard" />
             </div>
           </SignedIn>

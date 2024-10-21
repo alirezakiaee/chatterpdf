@@ -1,6 +1,10 @@
+import { ClerkLoaded } from "@clerk/nextjs"
+
 function DashboardLayout({children}: {children: React.ReactNode}) {
   return (
-    <div>{children}</div>
+    <ClerkLoaded>
+        <div>{children}</div>
+    </ClerkLoaded>
   )
 }
 

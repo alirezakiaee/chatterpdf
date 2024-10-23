@@ -87,7 +87,14 @@ import { v4 as uuidv4 } from "uuid";
 import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
 import { db, storage } from "@/firebase";
 import { doc, serverTimestamp, setDoc } from "firebase/firestore";
-import { Upload, CheckCircle2, Database, Sparkles, AlertCircle } from "lucide-react";
+import {
+  Upload,
+  CheckCircle2,
+  Database,
+  Sparkles,
+  AlertCircle,
+} from "lucide-react";
+import { generateEmbeddings } from "@/actions/generateEmbeddings";
 
 export enum StatusText {
   UPLOADING = "Uploading file...",
@@ -115,7 +122,7 @@ export const StatusAnimations = {
   [StatusText.ERROR]: "animate-pulse",
 } as const;
 
-export type StatusIconType = typeof StatusIcons[Status];
+export type StatusIconType = (typeof StatusIcons)[Status];
 
 function useUpload() {
   const [progress, setProgress] = useState<number>(0);
@@ -138,7 +145,10 @@ function useUpload() {
       const fileIdToUploadTo = uuidv4();
       setFileId(fileIdToUploadTo);
 
-      const storageRef = ref(storage, `users/${user.id}/files/${fileIdToUploadTo}`);
+      const storageRef = ref(
+        storage,
+        `users/${user.id}/files/${fileIdToUploadTo}`
+      );
       const uploadTask = uploadBytesResumable(storageRef, file);
 
       return new Promise((resolve, reject) => {
@@ -159,23 +169,27 @@ function useUpload() {
             try {
               setStatus(StatusText.UPLOADED);
               const downloadUrl = await getDownloadURL(uploadTask.snapshot.ref);
-              
+
               setStatus(StatusText.SAVING);
-              await setDoc(doc(db, "users", user.id, "files", fileIdToUploadTo), {
-                name: file.name,
-                url: downloadUrl,
-                size: file.size,
-                type: file.type,
-                downloadUrl: downloadUrl,
-                ref: uploadTask.snapshot.ref.fullPath,
-                createdAt: serverTimestamp(),
-                fileId: fileIdToUploadTo,
-                userId: user.id,
-              });
+              await setDoc(
+                doc(db, "users", user.id, "files", fileIdToUploadTo),
+                {
+                  name: file.name,
+                  url: downloadUrl,
+                  size: file.size,
+                  type: file.type,
+                  downloadUrl: downloadUrl,
+                  ref: uploadTask.snapshot.ref.fullPath,
+                  createdAt: serverTimestamp(),
+                  fileId: fileIdToUploadTo,
+                  userId: user.id,
+                }
+              );
 
               setStatus(StatusText.GENERATING);
               // Here you would add your AI embeddings generation logic
-              
+              await generateEmbeddings(fileIdToUploadTo);
+
               resolve();
             } catch (error) {
               setError(error.message);

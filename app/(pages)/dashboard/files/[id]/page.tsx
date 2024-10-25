@@ -1,3 +1,4 @@
+import Chat from "@/components/Chat";
 import PdfView from "@/components/PdfView";
 import { adminDb } from "@/firebaseAdmin";
 import { auth } from "@clerk/nextjs/server";
@@ -23,11 +24,13 @@ async function ChatToFilePage({
   return (
     <div className="grid lg:grid-cols-5 h-screen overflow-hidden">
       {/* Right section */}
-      <div className="col-span-5 lg:col-span-2 overflow-y-auto">chat</div>
+      <div className="col-span-5 lg:col-span-2 overflow-y-auto">
+        <Chat id={id} />
+      </div>
 
 
       {/* Left section */}
-      <div className="col-span-5 lg:col-span-3 bg-gray-100 border-r-2 lg:border-indigo-600 lg:-order-1 overflow-auto">
+      <div className="max-h-3.5dvh col-span-5 lg:col-span-3 bg-gray-100 border-r-2 lg:border-indigo-600 lg:-order-1 overflow-hidden">
         <PdfView url={url!} />
       </div>
     </div>

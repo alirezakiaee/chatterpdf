@@ -47,7 +47,7 @@ function PdfView({ url }: { url: string }) {
   const [numPages, setNumPages] = useState<number>();
   const [pageNumber, setPageNumber] = useState<number>(1);
   const [file, setFile] = useState<Blob | null>(null);
-  const [rotation, setRotation] = useState<number>(0);
+  const [rotation, setRotation] = useState<number>(0); 
   const [scale, setScale] = useState<number>(1);
 
   useEffect(() => {
@@ -68,7 +68,7 @@ function PdfView({ url }: { url: string }) {
       <Sheet>
         <Card className="justify-center items-center">
           <div className="sticky top-0 z-50 bg-red-100 p-2">
-            <div className="max-w-6xl px-2 grid grid-cols-6 gap-2">
+            <div className="max-w-6xl px-2 grid grid-cols-8 gap-2">
               <Button
                 variant="outline"
                 disabled={pageNumber == 1}

@@ -3,13 +3,13 @@
 import { FormEvent, useEffect, useRef, useState, useTransition } from "react";
 import { Button } from "./ui/button";
 import { Input } from "@/components/ui/input";
-// import { askQuestion, Message } from "@/actions/askQuestion";
 import { Loader2Icon } from "lucide-react";
 // import ChatMessage from "./ChatMessage";
 import { useCollection } from "react-firebase-hooks/firestore";
 import { useUser } from "@clerk/nextjs";
 import { collection, orderBy, query } from "firebase/firestore";
 import { db } from "@/firebase";
+import { askQuestion } from "@/actions/askQuestion";
 
 export type Message = {
   id?: string;
@@ -22,6 +22,7 @@ function Chat({ id }: { id: string }) {
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
   const [isPending, startTransition] = useTransition();
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const [snapshot, loading, error] = useCollection(
     user &&
@@ -32,11 +33,33 @@ function Chat({ id }: { id: string }) {
   );
 
   useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  });
+
+  useEffect(() => {
     if (!snapshot) return;
     console.log("Updated snapshot", snapshot.docs);
 
     const lastMessage = messages.pop();
-  }, [snapshot, messages]);
+    if (lastMessage?.role === "ai" && lastMessage.message === "Thinking...") {
+      // return as this is a dummy placeholder message return;
+    }
+
+    const newMessages = snapshot.docs.map((doc) => {
+      const { role, message, createdAt } = doc.data();
+      return {
+        id: doc.id,
+        role,
+        message,
+        createdAt: createdAt.toDate(),
+      };
+    });
+    setMessages(newMessages);
+
+    // Ignore messages dependancy warning here ... we don't want an infinite loop
+  }, [snapshot]);
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -78,7 +101,42 @@ function Chat({ id }: { id: string }) {
   return (
     <div className="flex flex-col h-screen overflow-scroll">
       {/* Chat content */}
-      <div className="flex-1 w-full">{/* Chat messages */}</div>
+      <div className="flex-1 w-full">
+        {/* Chat messages */}
+
+        {loading && (
+          <div className="flex items-center justify-center h-full">
+            <Loader2Icon className="w-6 h-6 animate-spin" />
+          </div>
+        )}
+
+        {messages.map((message) => (
+          <div
+            key={message.id}
+            className={`flex ${message.role === "human" ? "justify-end" : ""}`}
+          >
+            <div
+              className={`${
+                message.role === "human"
+                  ? "bg-indigo-600 text-white"
+                  : "bg-gray-100"
+              } p-4 rounded-lg m-3`}
+            >
+              <p
+                className={`text-sm ${
+                  message.role === "human"
+                    ? "text-right text-white-600"
+                    : "text-left"
+                }`}
+              >
+                {message.message}
+              </p>
+            </div>
+          </div>
+        ))}
+
+        <div ref={messagesEndRef} />
+      </div>
 
       {/* Chat input */}
       <form

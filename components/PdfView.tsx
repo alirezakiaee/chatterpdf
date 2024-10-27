@@ -64,7 +64,7 @@ function PdfView({ url }: { url: string }) {
   };
 
   return (
-    <div className="flex justify-center items-center h-auto">
+    <div className="flex justify-center items-center max-h-screen">
       <Sheet>
         <Card className="justify-center items-center">
           <div className="sticky top-0 z-50 bg-red-100 p-2">

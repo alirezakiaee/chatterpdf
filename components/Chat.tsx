@@ -4,12 +4,12 @@ import { FormEvent, useEffect, useRef, useState, useTransition } from "react";
 import { Button } from "./ui/button";
 import { Input } from "@/components/ui/input";
 import { Loader2Icon } from "lucide-react";
-// import ChatMessage from "./ChatMessage";
 import { useCollection } from "react-firebase-hooks/firestore";
 import { useUser } from "@clerk/nextjs";
 import { collection, orderBy, query } from "firebase/firestore";
 import { db } from "@/firebase";
 import { askQuestion } from "@/actions/askQuestion";
+import ChatMessage from "./ChatMessage";
 
 export type Message = {
   id?: string;
@@ -104,38 +104,30 @@ function Chat({ id }: { id: string }) {
       <div className="flex-1 w-full">
         {/* Chat messages */}
 
-        {loading && (
-          <div className="flex items-center justify-center h-full">
-            <Loader2Icon className="w-6 h-6 animate-spin" />
+        {loading ? (
+          <div className="flex items-center justify-center">
+            <Loader2Icon className="animate-spin h-20 w-20 ☐ text-indigo-600 mt-20" />
+          </div>
+        ) : (
+          <div className="p-5">
+            {messages.length === 0 && (
+              <ChatMessage
+                key={"placeholder"}
+                message={{
+                  role: "ai",
+                  message: "Ask me anything about the document!",
+                  createdAt: new Date(),
+                }}
+              />
+            )}
+
+            {messages.map((message, index) => (
+              <ChatMessage key={index} message={message} />
+            ))}
+
+            <div ref={messagesEndRef} />
           </div>
         )}
-
-        {messages.map((message) => (
-          <div
-            key={message.id}
-            className={`flex ${message.role === "human" ? "justify-end" : ""}`}
-          >
-            <div
-              className={`${
-                message.role === "human"
-                  ? "bg-indigo-600 text-white"
-                  : "bg-gray-100"
-              } p-4 rounded-lg m-3`}
-            >
-              <p
-                className={`text-sm ${
-                  message.role === "human"
-                    ? "text-right text-white-600"
-                    : "text-left"
-                }`}
-              >
-                {message.message}
-              </p>
-            </div>
-          </div>
-        ))}
-
-        <div ref={messagesEndRef} />
       </div>
 
       {/* Chat input */}

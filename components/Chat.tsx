@@ -2,7 +2,7 @@
 
 import { FormEvent, useEffect, useRef, useState, useTransition } from "react";
 import { Button } from "./ui/button";
-import { Input } from "@/components/ui/input";
+import { Input } from "./ui/input";
 import { Loader2Icon } from "lucide-react";
 import { useCollection } from "react-firebase-hooks/firestore";
 import { useUser } from "@clerk/nextjs";
@@ -10,6 +10,7 @@ import { collection, orderBy, query } from "firebase/firestore";
 import { db } from "@/firebase";
 import { askQuestion } from "@/actions/askQuestion";
 import ChatMessage from "./ChatMessage";
+import { useToast } from "./ui/use-toast";
 
 export type Message = {
   id?: string;
@@ -17,12 +18,15 @@ export type Message = {
   message: string;
   createdAt: Date;
 };
+
 function Chat({ id }: { id: string }) {
   const { user } = useUser();
+  const { toast } = useToast();
+
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
   const [isPending, startTransition] = useTransition();
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const bottomOfChatRef = useRef<HTMLDivElement>(null);
 
   const [snapshot, loading, error] = useCollection(
     user &&
@@ -33,22 +37,27 @@ function Chat({ id }: { id: string }) {
   );
 
   useEffect(() => {
-    if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
-    }
-  });
+    bottomOfChatRef.current?.scrollIntoView({
+      behavior: "smooth",
+    });
+  }, [messages]);
 
   useEffect(() => {
     if (!snapshot) return;
+
     console.log("Updated snapshot", snapshot.docs);
 
+    // get second last message to check if the AI is thinking
     const lastMessage = messages.pop();
+
     if (lastMessage?.role === "ai" && lastMessage.message === "Thinking...") {
-      // return as this is a dummy placeholder message return;
+      // return as this is a dummy placeholder message
+      return;
     }
 
     const newMessages = snapshot.docs.map((doc) => {
       const { role, message, createdAt } = doc.data();
+
       return {
         id: doc.id,
         role,
@@ -56,17 +65,20 @@ function Chat({ id }: { id: string }) {
         createdAt: createdAt.toDate(),
       };
     });
+
     setMessages(newMessages);
 
-    // Ignore messages dependancy warning here ... we don't want an infinite loop
+    // Ignore messages dependancy warning here... we dont want an infinite loop
   }, [snapshot]);
 
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
+
     const q = input;
+
     setInput("");
 
-    //optimistic ui update
+    // Optimistic UI update
     setMessages((prev) => [
       ...prev,
       {
@@ -80,11 +92,19 @@ function Chat({ id }: { id: string }) {
         createdAt: new Date(),
       },
     ]);
+
     startTransition(async () => {
       const { success, message } = await askQuestion(id, q);
 
+      console.log("DEBUG", success, message);
+
       if (!success) {
-        // toast...
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: message,
+        });
+
         setMessages((prev) =>
           prev.slice(0, prev.length - 1).concat([
             {
@@ -99,14 +119,14 @@ function Chat({ id }: { id: string }) {
   };
 
   return (
-    <div className="flex flex-col h-screen overflow-scroll">
-      {/* Chat content */}
+    <div className="flex flex-col h-full overflow-scroll">
+      {/* Chat contents */}
       <div className="flex-1 w-full">
-        {/* Chat messages */}
+        {/* chat messages... */}
 
         {loading ? (
           <div className="flex items-center justify-center">
-            <Loader2Icon className="animate-spin h-20 w-20 ☐ text-indigo-600 mt-20" />
+            <Loader2Icon className="animate-spin h-20 w-20 text-indigo-600 mt-20" />
           </div>
         ) : (
           <div className="p-5">
@@ -125,28 +145,30 @@ function Chat({ id }: { id: string }) {
               <ChatMessage key={index} message={message} />
             ))}
 
-            <div ref={messagesEndRef} />
+            <div ref={bottomOfChatRef} />
           </div>
         )}
       </div>
 
-      {/* Chat input */}
       <form
         onSubmit={handleSubmit}
-        className="flex sticky bottom-0 space-x-2 items-center bg-indigo-600 p-5"
+        className="flex sticky bottom-0 space-x-2 p-5 bg-indigo-600/75"
       >
         <Input
-          placeholder="Ask a question..."
+          placeholder="Ask a Question..."
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          className="bg-slate-100 "
         />
+
         <Button type="submit" disabled={!input || isPending}>
-          {isPending ? <Loader2Icon className="w-6 h-6 animate-spin" /> : "Ask"}
+          {isPending ? (
+            <Loader2Icon className="animate-spin text-indigo-600" />
+          ) : (
+            "Ask"
+          )}
         </Button>
       </form>
     </div>
   );
 }
-
 export default Chat;

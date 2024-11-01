@@ -1,9 +1,11 @@
 "use client";
+
 import { useUser } from "@clerk/nextjs";
 import Image from "next/image";
 import { BotIcon, Loader2Icon } from "lucide-react";
 import Markdown from "react-markdown";
 import { Message } from "./Chat";
+
 function ChatMessage({ message }: { message: Message }) {
   const isHuman = message.role === "human";
   const { user } = useUser();
@@ -24,11 +26,12 @@ function ChatMessage({ message }: { message: Message }) {
             )
           ) : (
             <div className="h-10 w-10 bg-indigo-600 flex items-center justify-center">
-              <BotIcon className="text-white h-7 w-7" />
+              <BotIcon className="text-white h-7 w-7 " />
             </div>
           )}
         </div>
       </div>
+
       <div
         className={`chat-bubble prose ${isHuman && "bg-indigo-600 text-white"}`}
       >

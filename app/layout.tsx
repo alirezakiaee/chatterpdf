@@ -29,9 +29,8 @@ export default function RootLayout({
     <ClerkProvider signInFallbackRedirectUrl="/dashboard">
       <html lang="en">
         <body
-          className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen h-screen overflow-scroll container mx-auto px-4`}
+          className={`${geistSans.variable} ${geistMono.variable} min-h-screen h-screen overflow-hidden flex flex-col`}
         >
-          
           <Header />
           {children}
         </body>
